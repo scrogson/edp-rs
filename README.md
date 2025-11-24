@@ -9,6 +9,7 @@ This project was heavily inspired by [a set of Go libraries](https://github.com/
 
 ### Key Differences from Similar Libraries
 
+ * Extensive test coverage, including unit, integration, and property-based tests
  * `crates/erltf` implements supports for [fragmented messages](https://www.erlang.org/docs/27/apps/erts/erl_ext_dist#distribution-header) (a.k.a. [`DFLAG_FRAGMENTS`](https://www.erlang.org/docs/27/apps/erts/erl_dist_protocol#DFLAG_FRAGMENTS)), a feature
    almost always skipped by other implementations due to its complexity and imperfect documentation
  * `crates/erltf_serde` provides Serde glue
@@ -36,6 +37,23 @@ This set of libraries target Erlang/OTP 26 and 27. It should be compatible with 
 ## Examples
 
 A number of integration examples can be found under `crates/examples`.
+
+
+## Throughput and Efficiency
+
+These libraries were developed with efficiency in mind, both in terms of memory allocations and binary
+parser performance.
+
+The Erlang Term Format encoder and decoder can achive throughput ranging from hundreds of MiBs to tens of GiBs
+per second in terms of throughput, see `CONTRIBUTING.md` to learn how to run the benchmarks.
+
+Actual throughput will vary from workload to workload.
+
+
+
+## Contributing
+
+Contributions to this project are very welcome. Please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) to learn more.
 
 
 ## License
