@@ -61,6 +61,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Erlang/OTP
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27'
+          install-rebar: false
+          install-hex: false
+
+      - name: Start EPMD
+        run: epmd -daemon
+
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
