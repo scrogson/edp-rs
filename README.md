@@ -31,12 +31,12 @@ This set of libraries target Erlang/OTP 26 and 27. It should be compatible with 
  * `crates/edp_client`: an Erlang Distribution Protocol client using Tokio
  * `crates/erltf`: an Erlang Term Format implementation
  * `crates/erltf_serde`: Serde glue for `erltf`
- * `crates/examples`: various examples that demonstrate the usage of this library suite
+ * `crates/edp_examples`: various examples that demonstrate the usage of this library suite
 
 
 ## Examples
 
-A number of integration examples can be found under `crates/examples`.
+A number of integration examples can be found under `crates/edp_examples`.
 
 
 ## Throughput and Efficiency

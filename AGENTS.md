@@ -14,7 +14,7 @@ This is a Rust workspace managed by `cargo`. The repository layout is as follows
  * `crates/edp_client`: an Erlang Distribution Protocol client using Tokio
  * `crates/erltf`: an Erlang Term Format implementation
  * `crates/erltf_serde`: Serde glue for `erltf`
- * `crates/examples`: various examples that demonstrate the usage of this library suite
+ * `crates/edp_examples`: various examples that demonstrate the usage of this library suite
 
 ### The Erlang Term Format Crate, `erltf`
 

@@ -332,6 +332,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "edp_examples"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "edp_client",
+ "edp_node",
+ "erltf",
+ "erltf_serde",
+ "hostname",
+ "tabled",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "edp_node"
 version = "0.6.0"
 dependencies = [
@@ -384,23 +401,6 @@ checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "examples"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "edp_client",
- "edp_node",
- "erltf",
- "erltf_serde",
- "hostname",
- "tabled",
- "tokio",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

@@ -14,9 +14,9 @@
 
 use anyhow::{Context, Result};
 use clap::{value_parser, Arg, ArgMatches, Command};
+use edp_examples::common;
 use edp_node::Node;
 use erltf::OwnedTerm;
-use examples::common;
 use std::collections::HashMap;
 use tabled::{Table, Tabled};
 use tracing_subscriber::EnvFilter;

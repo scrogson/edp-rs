@@ -18,12 +18,12 @@ Queries the local EPMD daemon for the list of registered Erlang nodes, that is, 
 
 Bash/Zsh:
 ```bash
-cargo run --package examples --bin example_epmd_names
+cargo run --package edp_examples --bin example_epmd_names
 ```
 
 Nu shell:
 ```nu
-cargo run --package examples --bin example_epmd_names
+cargo run --package edp_examples --bin example_epmd_names
 ```
 
 **Expected Output:**
@@ -44,19 +44,19 @@ Connects to a RabbitMQ node and calls `rabbit:status/0` via the Erlang Distribut
 Bash/Zsh:
 ```bash
 # Connect to default node (rabbit@<hostname>)
-cargo run --package examples --bin example_rabbitmq_status
+cargo run --package edp_examples --bin example_rabbitmq_status
 
 # Connect to a specific node
-cargo run --package examples --bin example_rabbitmq_status rabbit@my-server
+cargo run --package edp_examples --bin example_rabbitmq_status rabbit@my-server
 ```
 
 Nu shell:
 ```nu
 # Connect to default node (rabbit@<hostname>)
-cargo run --package examples --bin example_rabbitmq_status
+cargo run --package edp_examples --bin example_rabbitmq_status
 
 # Connect to a specific node
-cargo run --package examples --bin example_rabbitmq_status rabbit@my-server
+cargo run --package edp_examples --bin example_rabbitmq_status rabbit@my-server
 ```
 
 **Arguments:**
@@ -100,12 +100,12 @@ Tuple([
 
 Bash/Zsh:
 ```bash
-cargo build --package examples
+cargo build --package edp_examples
 ```
 
 Nu shell:
 ```nu
-cargo build --package examples
+cargo build --package edp_examples
 ```
 
 ## Running Tests
@@ -121,7 +121,7 @@ Demonstrates creating a distributed Erlang node with processes, message passing,
 **Usage:**
 
 ```bash
-cargo run --package examples --bin example_simple_node
+cargo run --package edp_examples --bin example_simple_node
 ```
 
 ## Development

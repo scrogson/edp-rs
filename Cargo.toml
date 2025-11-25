@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/erltf", "crates/erltf_serde", "crates/edp_client", "crates/edp_node", "crates/examples"]
+members = ["crates/erltf", "crates/erltf_serde", "crates/edp_client", "crates/edp_node", "crates/edp_examples"]
 resolver = "2"
 
 [workspace.package]
