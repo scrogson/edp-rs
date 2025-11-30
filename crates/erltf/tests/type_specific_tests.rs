@@ -107,6 +107,14 @@ fn test_roundtrip_pid_parsing() {
     assert_eq!(original, parsed);
 }
 
+#[test]
+fn test_to_erl_pid_string() {
+    let node = Atom::new("rabbit@server");
+    let pid = ExternalPid::new(node, 999, 1234, 5);
+
+    assert_eq!(pid.to_erl_pid_string(), "<0.999.1234>");
+}
+
 // ============================================================================
 // ExternalFun Tests
 // ============================================================================

@@ -14,7 +14,7 @@
 
 use crate::errors::TermConversionError;
 use crate::types::{
-    Atom, BigInt, ExternalFun, ExternalPid, ExternalPort, ExternalReference, InternalFun, Sign,
+    Atom, BigInt, ExternalFun, ExternalPid, ExternalPort, ExternalReference, InternalFun, Mfa, Sign,
 };
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap};
@@ -715,6 +715,226 @@ impl OwnedTerm {
             OwnedTerm::Binary(b) => Some(String::from_utf8_lossy(b).to_string()),
             _ => None,
         }
+    }
+
+    #[inline]
+    pub fn as_erlang_string_or(&self, default: &str) -> String {
+        self.as_erlang_string()
+            .unwrap_or_else(|| default.to_string())
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn tuple_get(&self, index: usize) -> Option<&OwnedTerm> {
+        match self {
+            OwnedTerm::Tuple(t) => t.get(index),
+            _ => None,
+        }
+    }
+
+    #[inline]
+    pub fn tuple_get_string(&self, index: usize) -> Option<String> {
+        self.tuple_get(index).and_then(|t| t.as_erlang_string())
+    }
+
+    #[inline]
+    pub fn tuple_get_string_or(&self, index: usize, default: &str) -> String {
+        self.tuple_get_string(index)
+            .unwrap_or_else(|| default.to_string())
+    }
+
+    #[inline]
+    pub fn tuple_get_atom_string(&self, index: usize) -> Option<String> {
+        self.tuple_get(index)
+            .and_then(|t| t.as_atom())
+            .map(|a| a.to_string())
+    }
+
+    #[inline]
+    pub fn tuple_get_atom_string_or(&self, index: usize, default: &str) -> String {
+        self.tuple_get_atom_string(index)
+            .unwrap_or_else(|| default.to_string())
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn charlist<S: AsRef<str>>(s: S) -> Self {
+        let chars: Vec<OwnedTerm> = s
+            .as_ref()
+            .chars()
+            .map(|c| OwnedTerm::Integer(c as i64))
+            .collect();
+        OwnedTerm::List(chars)
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn is_charlist(&self) -> bool {
+        fn is_valid_unicode_scalar(i: i64) -> bool {
+            (0..=0x10FFFF).contains(&i) && !(0xD800..=0xDFFF).contains(&i)
+        }
+        match self {
+            OwnedTerm::List(elements) => elements
+                .iter()
+                .all(|t| matches!(t, OwnedTerm::Integer(i) if is_valid_unicode_scalar(*i))),
+            OwnedTerm::Nil => true,
+            _ => false,
+        }
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn as_charlist_string(&self) -> Option<String> {
+        match self {
+            OwnedTerm::List(elements) => {
+                let chars: Option<String> = elements
+                    .iter()
+                    .map(|t| match t {
+                        OwnedTerm::Integer(i) if *i >= 0 && *i <= 0x10FFFF => {
+                            char::from_u32(*i as u32)
+                        }
+                        _ => None,
+                    })
+                    .collect();
+                chars
+            }
+            OwnedTerm::Nil => Some(String::new()),
+            OwnedTerm::String(s) => Some(s.clone()),
+            OwnedTerm::Binary(b) => Some(String::from_utf8_lossy(b).to_string()),
+            _ => None,
+        }
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn as_list_or_empty(&self) -> &[OwnedTerm] {
+        match self {
+            OwnedTerm::List(l) => l,
+            OwnedTerm::Nil => &[],
+            _ => &[],
+        }
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn try_as_mfa(&self) -> Option<Mfa> {
+        Mfa::try_from_term(self)
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn format_as_mfa(&self) -> Option<String> {
+        self.try_as_mfa().map(|mfa| mfa.to_string())
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn as_pid(&self) -> Option<&ExternalPid> {
+        match self {
+            OwnedTerm::Pid(pid) => Some(pid),
+            _ => None,
+        }
+    }
+
+    #[inline]
+    pub fn try_as_pid(&self) -> Result<&ExternalPid, TermConversionError> {
+        self.as_pid().ok_or(TermConversionError::WrongType {
+            expected: "Pid",
+            actual: self.type_name(),
+        })
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn is_pid(&self) -> bool {
+        matches!(self, OwnedTerm::Pid(_))
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn format_as_pid(&self) -> Option<String> {
+        self.as_pid().map(|p| p.to_string())
+    }
+
+    #[inline]
+    pub fn proplist_get_i64(&self, key: &str) -> Option<i64> {
+        self.proplist_get_atom_key(key).and_then(|t| t.as_integer())
+    }
+
+    #[inline]
+    pub fn proplist_get_i64_or(&self, key: &str, default: i64) -> i64 {
+        self.proplist_get_i64(key).unwrap_or(default)
+    }
+
+    #[inline]
+    pub fn proplist_get_bool(&self, key: &str) -> Option<bool> {
+        self.proplist_get_atom_key(key).and_then(|t| t.as_bool())
+    }
+
+    #[inline]
+    pub fn proplist_get_bool_or(&self, key: &str, default: bool) -> bool {
+        self.proplist_get_bool(key).unwrap_or(default)
+    }
+
+    #[inline]
+    pub fn proplist_get_atom(&self, key: &str) -> Option<&Atom> {
+        self.proplist_get_atom_key(key).and_then(|t| t.as_atom())
+    }
+
+    #[inline]
+    pub fn proplist_get_string(&self, key: &str) -> Option<String> {
+        self.proplist_get_atom_key(key)
+            .and_then(|t| t.as_erlang_string())
+    }
+
+    #[inline]
+    pub fn proplist_get_string_or(&self, key: &str, default: &str) -> String {
+        self.proplist_get_string(key)
+            .unwrap_or_else(|| default.to_string())
+    }
+
+    #[inline]
+    pub fn proplist_get_pid(&self, key: &str) -> Option<&ExternalPid> {
+        self.proplist_get_atom_key(key).and_then(|t| t.as_pid())
+    }
+
+    #[inline]
+    pub fn proplist_get_atom_string(&self, key: &str) -> Option<String> {
+        self.proplist_get_atom(key).map(|a| a.to_string())
+    }
+
+    #[inline]
+    pub fn proplist_get_atom_string_or(&self, key: &str, default: &str) -> String {
+        self.proplist_get_atom_string(key)
+            .unwrap_or_else(|| default.to_string())
+    }
+
+    #[inline]
+    pub fn proplist_get_pid_string(&self, key: &str) -> Option<String> {
+        self.proplist_get_pid(key).map(|p| p.to_string())
+    }
+
+    #[inline]
+    pub fn proplist_get_mfa_string(&self, key: &str) -> Option<String> {
+        self.proplist_get_atom_key(key)
+            .and_then(|t| t.format_as_mfa())
+    }
+
+    #[inline]
+    pub fn proplist_get_mfa_string_or(&self, key: &str, default: &str) -> String {
+        self.proplist_get_mfa_string(key)
+            .unwrap_or_else(|| default.to_string())
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn atom_list(names: &[&str]) -> Self {
+        OwnedTerm::List(
+            names
+                .iter()
+                .map(|n| OwnedTerm::Atom(Atom::new(*n)))
+                .collect(),
+        )
     }
 
     pub fn map_iter(&self) -> Option<impl Iterator<Item = (&OwnedTerm, &OwnedTerm)>> {

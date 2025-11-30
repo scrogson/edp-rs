@@ -41,6 +41,7 @@
 //! }
 //! ```
 
+pub mod erlang_mod_fns;
 pub mod errors;
 pub mod gen_event;
 pub mod gen_server;
@@ -55,9 +56,12 @@ pub use gen_event::{
 };
 pub use gen_server::{CallResult, GenServer, GenServerProcess};
 pub use mailbox::{Mailbox, Message};
-pub use node::{Node, DEFAULT_RPC_TIMEOUT};
+pub use node::{DEFAULT_RPC_TIMEOUT, Node};
 pub use process::{Process, ProcessHandle};
 pub use registry::ProcessRegistry;
 
-pub use erltf::{Atom, OwnedTerm, errors::TermConversionError, term_list, term_map, term_tuple};
+pub use erltf::{
+    Atom, ExternalPid, Mfa, OwnedTerm, erl_atom, erl_atoms, erl_int, erl_list, erl_map, erl_tuple,
+    errors::TermConversionError,
+};
 pub use erltf_serde::{OwnedTermExt, from_term, to_term};

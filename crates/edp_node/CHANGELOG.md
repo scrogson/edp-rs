@@ -1,8 +1,12 @@
 # edp_node Change Log
 
-## v0.10.0 (in development)
+## v0.10.0 (Nov 29, 2025)
 
-(no changes)
+### Enhancements
+
+ * New `erlang_mod_fns` module with RPC helpers: `erlang_system_info`, `erlang_statistics`, `erlang_memory`, `erlang_processes`, `erlang_process_info`, `erlang_list_to_pid`
+ * Re-exports `ExternalPid` and `Mfa` from `erltf`
+ * Re-exports all `erl_*` macros from `erltf`: `erl_tuple!`, `erl_list!`, `erl_map!`, `erl_atom!`, `erl_atoms!`, `erl_int!`
 
 
 ## v0.9.0 (Nov 29, 2025)

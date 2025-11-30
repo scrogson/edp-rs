@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use crate::errors::DecodeError;
+use crate::term::OwnedTerm;
 use std::borrow::Borrow;
 use std::fmt;
 use std::ops::Deref;
@@ -296,6 +297,18 @@ impl ExternalPid {
 
         Ok(ExternalPid::new(node, id, serial, creation))
     }
+
+    #[inline]
+    #[must_use]
+    pub fn to_erl_pid_string(&self) -> String {
+        format!("<0.{}.{}>", self.id, self.serial)
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn to_charlist_term(&self) -> OwnedTerm {
+        OwnedTerm::charlist(self.to_erl_pid_string())
+    }
 }
 
 impl fmt::Display for ExternalPid {
@@ -354,6 +367,73 @@ impl ExternalFun {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Mfa {
+    pub module: Atom,
+    pub function: Atom,
+    pub arity: u8,
+}
+
+impl Mfa {
+    #[inline]
+    pub fn new<M, F>(module: M, function: F, arity: u8) -> Self
+    where
+        M: Into<Atom>,
+        F: Into<Atom>,
+    {
+        Mfa {
+            module: module.into(),
+            function: function.into(),
+            arity,
+        }
+    }
+
+    pub fn try_from_term(term: &OwnedTerm) -> Option<Self> {
+        match term {
+            OwnedTerm::Tuple(elems) if elems.len() == 3 => {
+                let module = elems[0].as_atom()?.clone();
+                let function = elems[1].as_atom()?.clone();
+                let arity = match &elems[2] {
+                    OwnedTerm::Integer(n) if *n >= 0 && *n <= 255 => *n as u8,
+                    _ => return None,
+                };
+                Some(Mfa {
+                    module,
+                    function,
+                    arity,
+                })
+            }
+            _ => None,
+        }
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn to_term(&self) -> OwnedTerm {
+        OwnedTerm::Tuple(vec![
+            OwnedTerm::Atom(self.module.clone()),
+            OwnedTerm::Atom(self.function.clone()),
+            OwnedTerm::Integer(self.arity as i64),
+        ])
+    }
+}
+
+impl fmt::Display for Mfa {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}/{}", self.module, self.function, self.arity)
+    }
+}
+
+impl From<ExternalFun> for Mfa {
+    fn from(fun: ExternalFun) -> Self {
+        Mfa {
+            module: fun.module,
+            function: fun.function,
+            arity: fun.arity,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct InternalFun {
     pub arity: u8,
@@ -364,7 +444,7 @@ pub struct InternalFun {
     pub old_index: u32,
     pub old_uniq: u32,
     pub pid: ExternalPid,
-    pub free_vars: Vec<crate::term::OwnedTerm>,
+    pub free_vars: Vec<OwnedTerm>,
 }
 
 impl InternalFun {
@@ -378,7 +458,7 @@ impl InternalFun {
         old_index: u32,
         old_uniq: u32,
         pid: ExternalPid,
-        free_vars: Vec<crate::term::OwnedTerm>,
+        free_vars: Vec<OwnedTerm>,
     ) -> Self {
         InternalFun {
             arity,

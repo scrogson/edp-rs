@@ -21,7 +21,7 @@ use criterion::criterion_main;
 use erltf::OwnedTerm;
 use erltf::decode;
 use erltf::encode;
-use erltf::term_tuple;
+use erltf::erl_tuple;
 use std::collections::BTreeMap;
 use std::time::Duration;
 
@@ -32,7 +32,7 @@ fn create_large_nested_structure() -> OwnedTerm {
         for j in 0..50 {
             inner_map.insert(
                 OwnedTerm::atom(format!("key_{}", j)),
-                term_tuple![
+                erl_tuple![
                     OwnedTerm::integer(i * 1000 + j),
                     OwnedTerm::float((i as f64) * 1.5 + (j as f64)),
                     OwnedTerm::binary(vec![i as u8; 64]),
@@ -48,7 +48,7 @@ fn create_large_nested_structure() -> OwnedTerm {
 fn create_large_list() -> OwnedTerm {
     let elements: Vec<OwnedTerm> = (0..10000)
         .map(|i| {
-            term_tuple![
+            erl_tuple![
                 OwnedTerm::atom(format!("item_{}", i)),
                 OwnedTerm::integer(i),
                 OwnedTerm::float(i as f64 * 2.5),
@@ -65,7 +65,7 @@ fn create_large_binary() -> OwnedTerm {
 fn create_deep_nested_structure() -> OwnedTerm {
     let mut term = OwnedTerm::integer(0);
     for i in 0..100 {
-        term = term_tuple![
+        term = erl_tuple![
             OwnedTerm::atom(format!("level_{}", i)),
             term,
             OwnedTerm::float(i as f64),
@@ -132,7 +132,7 @@ fn decode_small_structures(c: &mut Criterion) {
     for size in sizes.iter() {
         let terms: Vec<OwnedTerm> = (0..*size)
             .map(|i| {
-                term_tuple![
+                erl_tuple![
                     OwnedTerm::atom("item"),
                     OwnedTerm::integer(i),
                     OwnedTerm::float(i as f64),

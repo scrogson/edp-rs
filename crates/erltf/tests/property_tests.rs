@@ -142,4 +142,96 @@ proptest! {
         let decoded = decode(&encoded).unwrap();
         prop_assert_eq!(term, decoded);
     }
+
+    #[test]
+    fn test_prop_charlist_roundtrip(s in "[a-zA-Z0-9 ]{0,50}") {
+        let charlist = OwnedTerm::charlist(&s);
+        let back = charlist.as_charlist_string();
+        prop_assert_eq!(back, Some(s));
+    }
+
+    #[test]
+    fn test_prop_charlist_is_charlist(s in "[a-zA-Z0-9 ]{0,50}") {
+        let charlist = OwnedTerm::charlist(&s);
+        prop_assert!(charlist.is_charlist());
+    }
+
+    #[test]
+    fn test_prop_as_list_or_empty_preserves_list(elements in prop::collection::vec(any::<i32>(), 0..20)) {
+        let list = OwnedTerm::List(
+            elements.iter().map(|i| OwnedTerm::Integer(*i as i64)).collect()
+        );
+        prop_assert_eq!(list.as_list_or_empty().len(), elements.len());
+    }
+
+    #[test]
+    fn test_prop_format_as_mfa_consistent(
+        module in "[a-z][a-z0-9_]{0,20}",
+        function in "[a-z][a-z0-9_]{0,20}",
+        arity in 0u8..255u8
+    ) {
+        let term = OwnedTerm::Tuple(vec![
+            OwnedTerm::Atom(Atom::new(&module)),
+            OwnedTerm::Atom(Atom::new(&function)),
+            OwnedTerm::Integer(arity as i64),
+        ]);
+        let formatted = term.format_as_mfa().unwrap();
+        prop_assert_eq!(formatted, format!("{}:{}/{}", module, function, arity));
+    }
+
+    #[test]
+    fn test_prop_proplist_get_i64_or_default(value in any::<i64>(), default in any::<i64>()) {
+        let proplist = OwnedTerm::List(vec![OwnedTerm::Tuple(vec![
+            OwnedTerm::Atom(Atom::new("key")),
+            OwnedTerm::Integer(value),
+        ])]);
+        prop_assert_eq!(proplist.proplist_get_i64_or("key", default), value);
+        prop_assert_eq!(proplist.proplist_get_i64_or("missing", default), default);
+    }
+
+    #[test]
+    fn test_prop_proplist_get_bool_or_default(value: bool, default: bool) {
+        let proplist = OwnedTerm::List(vec![OwnedTerm::Tuple(vec![
+            OwnedTerm::Atom(Atom::new("key")),
+            OwnedTerm::Atom(Atom::new(if value { "true" } else { "false" })),
+        ])]);
+        prop_assert_eq!(proplist.proplist_get_bool_or("key", default), value);
+        prop_assert_eq!(proplist.proplist_get_bool_or("missing", default), default);
+    }
+
+    #[test]
+    fn test_prop_as_erlang_string_or(s in "[a-zA-Z0-9 ]{0,50}", default in "[a-z]{0,10}") {
+        let charlist = OwnedTerm::charlist(&s);
+        prop_assert_eq!(charlist.as_erlang_string_or(&default), s);
+        prop_assert_eq!(OwnedTerm::Integer(42).as_erlang_string_or(&default), default);
+    }
+
+    #[test]
+    fn test_prop_tuple_get_returns_correct_element(elements in prop::collection::vec(any::<i32>(), 1..10)) {
+        let tuple = OwnedTerm::Tuple(
+            elements.iter().map(|i| OwnedTerm::Integer(*i as i64)).collect()
+        );
+        for (idx, expected) in elements.iter().enumerate() {
+            let got = tuple.tuple_get(idx);
+            prop_assert!(got.is_some());
+            prop_assert_eq!(got.unwrap(), &OwnedTerm::Integer(*expected as i64));
+        }
+        prop_assert!(tuple.tuple_get(elements.len()).is_none());
+    }
+
+    #[test]
+    fn test_prop_tuple_get_string_charlist(
+        s0 in "[a-z]+",
+        s1 in "[a-zA-Z0-9 ]{0,30}",
+        s2 in "[0-9\\.]{1,10}"
+    ) {
+        let tuple = OwnedTerm::Tuple(vec![
+            OwnedTerm::Atom(Atom::new(&s0)),
+            OwnedTerm::charlist(&s1),
+            OwnedTerm::charlist(&s2),
+        ]);
+        prop_assert_eq!(tuple.tuple_get_atom_string(0), Some(s0));
+        prop_assert_eq!(tuple.tuple_get_string(1), Some(s1));
+        prop_assert_eq!(tuple.tuple_get_string(2), Some(s2));
+    }
 }

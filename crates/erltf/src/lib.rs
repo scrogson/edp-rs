@@ -28,24 +28,24 @@ pub use errors::{
     ContextualDecodeError, DecodeError, EncodeError, Error, ParsingContext, PathSegment, Result,
 };
 pub use term::OwnedTerm;
-pub use types::{Atom, BigInt, ExternalPid, ExternalPort, ExternalReference, Sign};
+pub use types::{Atom, BigInt, ExternalPid, ExternalPort, ExternalReference, Mfa, Sign};
 
 #[macro_export]
-macro_rules! term_tuple {
+macro_rules! erl_tuple {
     ($($elem:expr),* $(,)?) => {
         $crate::OwnedTerm::Tuple(vec![$($elem.into()),*])
     };
 }
 
 #[macro_export]
-macro_rules! term_list {
+macro_rules! erl_list {
     ($($elem:expr),* $(,)?) => {
         $crate::OwnedTerm::List(vec![$($elem.into()),*])
     };
 }
 
 #[macro_export]
-macro_rules! term_map {
+macro_rules! erl_map {
     ($($key:expr => $value:expr),* $(,)?) => {{
         let mut map = std::collections::BTreeMap::new();
         $(
@@ -53,4 +53,25 @@ macro_rules! term_map {
         )*
         $crate::OwnedTerm::Map(map)
     }};
+}
+
+#[macro_export]
+macro_rules! erl_atom {
+    ($name:expr) => {
+        $crate::OwnedTerm::Atom($crate::Atom::new($name))
+    };
+}
+
+#[macro_export]
+macro_rules! erl_atoms {
+    ($($name:expr),* $(,)?) => {
+        $crate::OwnedTerm::List(vec![$($crate::OwnedTerm::Atom($crate::Atom::new($name))),*])
+    };
+}
+
+#[macro_export]
+macro_rules! erl_int {
+    ($val:expr) => {
+        $crate::OwnedTerm::Integer($val as i64)
+    };
 }
