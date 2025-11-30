@@ -2,7 +2,10 @@
 
 ## v0.11.0 (in development)
 
-(no changes yet)
+### Enhancements
+
+ * `ExternalPid::from_local_pid_string` for parsing local pid string references (such as `"<0.123.0>"`)
+   with additional context that is not available in the input string
 
 
 ## v0.10.0 (Nov 29, 2025)
