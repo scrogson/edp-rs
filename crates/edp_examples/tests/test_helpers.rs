@@ -182,6 +182,18 @@ impl TestContext {
     ) -> Result<OwnedTerm> {
         Ok(self
             .node
+            .rpc_call_raw(&self.target_node_name, module, function, args)
+            .await?)
+    }
+
+    pub async fn rpc_call_unwrapped(
+        &mut self,
+        module: &str,
+        function: &str,
+        args: Vec<OwnedTerm>,
+    ) -> Result<OwnedTerm> {
+        Ok(self
+            .node
             .rpc_call(&self.target_node_name, module, function, args)
             .await?)
     }

@@ -49,6 +49,34 @@ impl Node {
         Self::with_hidden(name, cookie, true)
     }
 
+    pub async fn connect_to(
+        name: impl Into<String>,
+        cookie: impl Into<String>,
+        remote_node: impl Into<String>,
+    ) -> Result<Self> {
+        Self::connect_to_with_hidden(name, cookie, remote_node, false).await
+    }
+
+    pub async fn connect_to_hidden(
+        name: impl Into<String>,
+        cookie: impl Into<String>,
+        remote_node: impl Into<String>,
+    ) -> Result<Self> {
+        Self::connect_to_with_hidden(name, cookie, remote_node, true).await
+    }
+
+    async fn connect_to_with_hidden(
+        name: impl Into<String>,
+        cookie: impl Into<String>,
+        remote_node: impl Into<String>,
+        hidden: bool,
+    ) -> Result<Self> {
+        let mut node = Self::with_hidden(name, cookie, hidden);
+        node.start(0).await?;
+        node.connect(remote_node).await?;
+        Ok(node)
+    }
+
     fn with_hidden(name: impl Into<String>, cookie: impl Into<String>, hidden: bool) -> Self {
         let name_atom = Atom::new(name.into());
         let creation = 1;
@@ -469,6 +497,19 @@ impl Node {
     }
 
     pub async fn rpc_call(
+        &self,
+        remote_node: &str,
+        module: &str,
+        function: &str,
+        args: Vec<OwnedTerm>,
+    ) -> Result<OwnedTerm> {
+        let response = self
+            .rpc_call_raw(remote_node, module, function, args)
+            .await?;
+        response.into_rex_response().map_err(Error::from)
+    }
+
+    pub async fn rpc_call_raw(
         &self,
         remote_node: &str,
         module: &str,

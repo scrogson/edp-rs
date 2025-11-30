@@ -250,6 +250,70 @@ impl OwnedTerm {
         }
     }
 
+    #[inline]
+    pub fn try_as_integer(&self) -> Result<i64, TermConversionError> {
+        self.as_integer().ok_or(TermConversionError::WrongType {
+            expected: "Integer",
+            actual: self.type_name(),
+        })
+    }
+
+    #[inline]
+    pub fn try_as_float(&self) -> Result<f64, TermConversionError> {
+        self.as_float().ok_or(TermConversionError::WrongType {
+            expected: "Float",
+            actual: self.type_name(),
+        })
+    }
+
+    #[inline]
+    pub fn try_as_atom(&self) -> Result<&Atom, TermConversionError> {
+        self.as_atom().ok_or(TermConversionError::WrongType {
+            expected: "Atom",
+            actual: self.type_name(),
+        })
+    }
+
+    #[inline]
+    pub fn try_as_binary(&self) -> Result<&[u8], TermConversionError> {
+        self.as_binary().ok_or(TermConversionError::WrongType {
+            expected: "Binary",
+            actual: self.type_name(),
+        })
+    }
+
+    #[inline]
+    pub fn try_as_string(&self) -> Result<&str, TermConversionError> {
+        self.as_string().ok_or(TermConversionError::WrongType {
+            expected: "String",
+            actual: self.type_name(),
+        })
+    }
+
+    #[inline]
+    pub fn try_as_list(&self) -> Result<&[OwnedTerm], TermConversionError> {
+        self.as_list().ok_or(TermConversionError::WrongType {
+            expected: "List",
+            actual: self.type_name(),
+        })
+    }
+
+    #[inline]
+    pub fn try_as_tuple(&self) -> Result<&[OwnedTerm], TermConversionError> {
+        self.as_tuple().ok_or(TermConversionError::WrongType {
+            expected: "Tuple",
+            actual: self.type_name(),
+        })
+    }
+
+    #[inline]
+    pub fn try_as_map(&self) -> Result<&BTreeMap<Self, Self>, TermConversionError> {
+        self.as_map().ok_or(TermConversionError::WrongType {
+            expected: "Map",
+            actual: self.type_name(),
+        })
+    }
+
     pub fn into_map_iter(
         self,
     ) -> Result<impl Iterator<Item = (OwnedTerm, OwnedTerm)>, TermConversionError> {
@@ -318,6 +382,18 @@ impl OwnedTerm {
 
     #[inline]
     #[must_use]
+    pub fn is_undefined(&self) -> bool {
+        self.is_atom_with_name("undefined")
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn is_nil_atom(&self) -> bool {
+        self.is_atom_with_name("nil")
+    }
+
+    #[inline]
+    #[must_use]
     pub fn as_bool(&self) -> Option<bool> {
         self.atom_name().and_then(|name| match name {
             "true" => Some(true),
@@ -336,6 +412,25 @@ impl OwnedTerm {
                 }
             }
             _ => None,
+        }
+    }
+
+    pub fn into_rex_response(self) -> Result<OwnedTerm, TermConversionError> {
+        match self {
+            OwnedTerm::Tuple(mut elements) if elements.len() == 2 => {
+                if elements[0].is_atom_with_name("rex") {
+                    Ok(elements.swap_remove(1))
+                } else {
+                    Err(TermConversionError::WrongType {
+                        expected: "{rex, Result} tuple",
+                        actual: "tuple with different first element",
+                    })
+                }
+            }
+            _ => Err(TermConversionError::WrongType {
+                expected: "{rex, Result} tuple",
+                actual: self.type_name(),
+            }),
         }
     }
 

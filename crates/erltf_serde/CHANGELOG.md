@@ -1,8 +1,10 @@
 # erltf_serde Change Log
 
-## v0.7.0 (in development)
+## v0.8.0 (Nov 29, 2025)
 
-No changes yet.
+### Enhancements
+
+ * New trait, `OwnedTermExt`, provides two functions: `try_deserialize` and `try_deserialize_proplist`
 
 
 ## v0.6.0 (Nov 29, 2025)

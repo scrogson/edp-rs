@@ -58,3 +58,6 @@ pub use mailbox::{Mailbox, Message};
 pub use node::Node;
 pub use process::{Process, ProcessHandle};
 pub use registry::ProcessRegistry;
+
+pub use erltf::{Atom, OwnedTerm, errors::TermConversionError, term_list, term_map, term_tuple};
+pub use erltf_serde::{OwnedTermExt, from_term, to_term};

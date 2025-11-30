@@ -1,8 +1,12 @@
 # erltf Change Log
 
-## v0.7.0 (in development)
+## v0.8.0 (Nov 29, 2025)
 
-No changes yet.
+### Enhancements
+
+ * New convenience function `into_rex_response` for unwrapping `{rex, Result}` RPC response tuples
+ * New helpers for common value comparisons: `is_undefined` and `is_nil_atom` helpers
+ * `try_as_*` methods returning `Result`
 
 
 ## v0.6.0 (Nov 29, 2025)

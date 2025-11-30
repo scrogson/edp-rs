@@ -14,6 +14,7 @@
 
 use edp_client::Error as ClientError;
 use erltf::EncodeError;
+use erltf::errors::TermConversionError;
 use erltf::types::{Atom, ExternalPid};
 use std::time::Duration;
 use thiserror::Error;
@@ -27,6 +28,9 @@ pub enum Error {
 
     #[error("Encode error: {0}")]
     Encode(#[from] EncodeError),
+
+    #[error("Term conversion error: {0}")]
+    TermConversion(#[from] TermConversionError),
 
     #[error("Process not found: {0:?}")]
     ProcessNotFound(ExternalPid),

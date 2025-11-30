@@ -19,3 +19,25 @@ mod ser;
 pub use de::{Deserializer, ProplistDeserializer, from_bytes, from_proplist, from_term};
 pub use error::{Error, Result};
 pub use ser::{Serializer, to_bytes, to_term};
+
+use erltf::OwnedTerm;
+use serde::de::DeserializeOwned;
+
+pub trait OwnedTermExt {
+    fn try_deserialize<T: DeserializeOwned>(&self) -> Result<T>;
+
+    fn try_deserialize_proplist<T: DeserializeOwned>(&self) -> Result<T>;
+}
+
+impl OwnedTermExt for OwnedTerm {
+    fn try_deserialize<T: DeserializeOwned>(&self) -> Result<T> {
+        let normalized = self
+            .to_map_recursive()
+            .map_err(|e| Error::Message(e.to_string()))?;
+        from_term(&normalized)
+    }
+
+    fn try_deserialize_proplist<T: DeserializeOwned>(&self) -> Result<T> {
+        from_proplist(self)
+    }
+}
